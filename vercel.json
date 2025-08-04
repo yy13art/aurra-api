@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "pages/api/aurra.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/aurra", "dest": "/pages/api/aurra.js" }
+  ]
+}
