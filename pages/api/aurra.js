@@ -1,44 +1,27 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Метод не разрешён" });
-    return;
+  // CORS заголовки
+  res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setHeader("Access-Control-Allow-Origin", "*"); // или конкретно: "https://aurra.space"
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Обработка preflight запроса
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
 
+  // Только POST
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Метод не разрешён" });
+  }
+
+  // Тело запроса
   const { question } = req.body;
 
   if (!question) {
-    res.status(400).json({ error: "Вопрос отсутствует" });
-    return;
+    return res.status(400).json({ error: "Вопрос не передан" });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: "Ты AURRA — мистический оракул. Отвечай метафорически, глубоко, интуитивно, мудро."
-        },
-        {
-          role: "user",
-          content: question
-        }
-      ]
-    })
-  });
-
-  const data = await response.json();
-
-  if (data.choices && data.choices.length > 0) {
-    res.status(200).json({ answer: data.choices[0].message.content.trim() });
-  } else {
-    res.status(500).json({ error: "Ответ от OpenAI пуст" });
-  }
+  // Основной ответ (тест)
+  return res.status(200).json({ answer: `Ты спросил: ${question}` });
 }
