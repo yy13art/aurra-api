@@ -20,6 +20,8 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body;
 
+    console.log("🔑 API KEY:", process.env.OPENAI_API_KEY ? "Есть" : "Нет");
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -29,8 +31,14 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'gpt-4',
         messages: [
-          { role: 'system', content: 'Ты оракул по имени AURRA. Отвечай красиво, глубоко, вдохновляюще, с оттенком магии. Отвечай на русском языке.' },
-          { role: 'user', content: message },
+          {
+            role: 'system',
+            content: 'Ты оракул по имени AURRA. Отвечай красиво, глубоко, вдохновляюще, с оттенком магии.',
+          },
+          {
+            role: 'user',
+            content: message,
+          },
         ],
         temperature: 0.9,
       }),
@@ -39,6 +47,7 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (data.error) {
+      console.error('❌ Ошибка от OpenAI:', data.error);
       return res.status(500).json({ error: data.error.message });
     }
 
@@ -46,4 +55,7 @@ export default async function handler(req, res) {
     res.status(200).json({ answer });
 
   } catch (error) {
-    console.error('Ошибка на сервере:',
+    console.error('🔥 Ошибка на сервере:', error);
+    res.status(500).json({ error: 'Внутренняя ошибка сервера', details: error.message });
+  }
+}
